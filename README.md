@@ -1,4 +1,4 @@
-# 🚀 LinkedIn Post Automation (n8n + OpenAI + Flux)
+#  LinkedIn Post Automation (n8n + OpenAI + Flux)
 
 The **LinkedIn Post Automation Workflow** is built in **n8n** and powered by **OpenAI GPT**.  
 
@@ -6,7 +6,7 @@ It automatically generates post content, creates images via **Flux image generat
 
 ---
 
-## 🧠 Workflow Functionality
+##  Workflow Functionality
 
 - Accepts **content ideas** via form submission  
 - Uses **OpenAI GPT model** to generate LinkedIn-ready content  
@@ -17,13 +17,13 @@ It automatically generates post content, creates images via **Flux image generat
 
 ---
 
-## 🖼 Workflow Preview
+##  Workflow Preview
 
 ![Workflow Screenshot](Screenshot.png)
 
 ---
 
-## 🔧 Setup Instructions
+##  Setup Instructions
 
 1. **Import the Workflow**  
    - In n8n, click **Import** → upload `LInkedin automation.json`  
@@ -40,7 +40,7 @@ It automatically generates post content, creates images via **Flux image generat
 
 ---
 
-## 💡 Example Use Cases
+##  Example Use Cases
 
 - Auto-generate and post **LinkedIn updates** with visuals  
 - Marketing teams scaling content publishing  
@@ -48,7 +48,7 @@ It automatically generates post content, creates images via **Flux image generat
 
 ---
 
-## 📦 Requirements
+##  Requirements
 
 - Running **n8n** instance (local or hosted)  
 - **OpenAI API Key**  
@@ -57,7 +57,7 @@ It automatically generates post content, creates images via **Flux image generat
 
 ---
 
-## 📩 Contribute or Extend
+##  Contribute or Extend
 
 Fork and extend this project for:
 
