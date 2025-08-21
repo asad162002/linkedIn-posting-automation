@@ -1,0 +1,374 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Generate Social Post",
+        "formDescription": "Enter a topic and get a Facebook post",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "topic"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -832,
+        416
+      ],
+      "id": "ecc420ba-4091-4a3d-8f8f-253384466bbf",
+      "name": "On form submission",
+      "webhookId": "6dc6ef21-7419-4e34-8d33-673a38d18282"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an expert LinkedIn content creator for a professional developer profile.\nThe person is a Flutter developer and n8n automation developer.\nYou will receive a single input: [TOPIC].\n\nReturn your answer ONLY in JSON format with two fields:\n{\n  \"caption\": \"...\",\n  \"image_prompt\": \"...\"\n}\n\nPart 1 — LinkedIn Caption:\n- Write a professional but engaging LinkedIn post about the topic.\n- Start with a strong hook in the first line to immediately capture attention.\n- Keep paragraphs short (max 3 sentences each) for readability.\n- Include:\n   1. A brief backstory or context related to the topic.\n   2. One or two specific challenges faced.\n   3. How you solved or approached them (technical or strategic).\n   4. A key takeaway or lesson learned that others can apply.\n- End with a call-to-action inviting discussion, opinions, or sharing of similar experiences.\n- Tone: Friendly, curious, and growth-oriented. Avoid overusing buzzwords.\n- Length: 120–180 words for optimal LinkedIn engagement.\n\nPart 2 — Image Generation Prompt:\n- Write a concise but vivid description for generating a professional LinkedIn post image for this topic.\n- Style: Modern, clean, minimal, flat illustrations or high-quality 3D renders with soft gradients.\n- Include relevant elements for Flutter (mobile UI) and/or n8n (automation workflows).\n- Color palette: Professional LinkedIn-friendly (blues, teals, purples, whites, light grays).\n- No text in the image unless a very short title is needed.\n- Size: 1200x628 px.\n\nTopic: {{ $json.topic }}\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -608,
+        416
+      ],
+      "id": "423b91da-8fc6-4a5b-85cc-0186bc94b09f",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "DghvEZ3X7KNpbqql",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "let content = $json.message.content.trim();\ncontent = content.replace(/```json|```/g, \"\").trim();\nlet parsed = {};\ntry {\n  parsed = JSON.parse(content);\n} catch (err) {\n  parsed = { caption: \"\", image_prompt: \"\", raw_content: content };\n}\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        416
+      ],
+      "id": "a58a501f-786b-4605-af7a-8b823482ec22",
+      "name": "Parse GPT JSON"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.bfl.ai/v1/flux-kontext-pro",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-key",
+              "value": "f827d572-7160-4f5c-9831-6b5de7557258"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.image_prompt }}\",\n  \"aspect_ratio\": \"16:9\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -256,
+        672
+      ],
+      "id": "ab172837-8d49-45d5-8d5c-68d4357002f6",
+      "name": "Generate Image (Flux)"
+    },
+    {
+      "parameters": {
+        "person": "axu5LlsFef",
+        "text": "={{ $('Parse GPT JSON').item.json.caption }}",
+        "shareMediaCategory": "IMAGE",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        912,
+        368
+      ],
+      "id": "fd2a71fd-4896-4fc7-8ed7-4b8141054052",
+      "name": "Create a post",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "sB1GKqf5VeloifWR",
+          "name": "LinkedIn account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Store Polling URL').first().json.pollingurl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        352,
+        624
+      ],
+      "name": "Download Image",
+      "id": "689da568-d7e6-44f5-9473-b12a13098343"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.result.sample }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        688,
+        368
+      ],
+      "id": "e317d59a-23df-4bbe-a3a5-4fd3138b7086",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ffe54b16-9093-4eb4-b830-3b0c0f0c43bc",
+              "leftValue": "={{$json[\"status\"]}}",
+              "rightValue": "Ready",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        176
+      ],
+      "id": "fbc8190c-2df8-49ee-8608-fd8f27419790",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        688,
+        176
+      ],
+      "id": "43e9ccb7-c978-4166-aa0b-93c2d83c5f3e",
+      "name": "Wait",
+      "webhookId": "b30e21c9-ead8-4b2d-ac1e-f96577ce1b2b"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bc168ddb-4efc-4b96-9430-849ca195cbb2",
+              "name": "pollingurl",
+              "value": "={{ $json.polling_url }}",
+              "type": "string"
+            },
+            {
+              "id": "7f2c4b8e-2e3a-4c9b-8b1d-3f5e6a7b8c9d",
+              "name": "caption",
+              "value": "={{ $('Parse GPT JSON').first().json.caption }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        720
+      ],
+      "id": "488f15b0-e9ac-4a32-a49c-56c49a1680c7",
+      "name": "Store Polling URL"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        272,
+        496
+      ],
+      "id": "2fa9941d-75d5-439f-a7a2-17eda686ef1a",
+      "name": "Merge Loop Data"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image (Flux)": {
+      "main": [
+        [
+          {
+            "node": "Store Polling URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse GPT JSON": {
+      "main": [
+        [
+          {
+            "node": "Generate Image (Flux)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Parse GPT JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Merge Loop Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Store Polling URL": {
+      "main": [
+        [
+          {
+            "node": "Merge Loop Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Loop Data": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f24d43e7-8a0f-4d6b-8744-1a6352b3be9f",
+  "meta": {
+    "instanceId": "41396870a6087f6d1ccc26fc8f0cd66672b90dc92c1c7cc47e377e8e993d2d68"
+  },
+  "id": "Jdf2xTPKLzb9APEZ",
+  "tags": []
+}
